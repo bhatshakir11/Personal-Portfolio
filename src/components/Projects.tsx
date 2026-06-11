@@ -27,11 +27,20 @@ interface Project {
   tags: string[];
   description: string[];
   github: string;
+  demo: string; // URL link to the video or live website demo
   gradient: string;
 }
 
 export const Projects: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'web' | 'ai'>('all');
+  const [activeVideo, setActiveVideo] = useState<string | null>(null);
+
+  const handleDemoClick = (e: React.MouseEvent, demoUrl: string) => {
+    if (demoUrl.endsWith('.mp4') || demoUrl.endsWith('.webm') || demoUrl.endsWith('.mov')) {
+      e.preventDefault();
+      setActiveVideo(demoUrl);
+    }
+  };
 
   const projectsData: Project[] = [
     {
@@ -45,6 +54,7 @@ export const Projects: React.FC = () => {
         "Implemented biometric authentication and autofill features to enhance security and improve user convenience."
       ],
       github: "https://github.com/bhatshakir11/Cyber_Hygeine_Password_Manager",
+      demo: "/cyberhygiene.mp4", // Point directly to the video in public folder
       gradient: "linear-gradient(135deg, #0d9488, #2563eb)"
     },
     {
@@ -58,6 +68,7 @@ export const Projects: React.FC = () => {
         "Implemented AI-powered email summarization, smart reminders, calendar scheduling, and daily productivity reports via WhatsApp and Telegram."
       ],
       github: "https://github.com/bhatshakir11/Multi_Agent_Productivity_AI",
+      demo: "#", // <-- Insert your Multi-Agent AI demo video link here if available
       gradient: "linear-gradient(135deg, #7c3aed, #a855f7)"
     },
     {
@@ -71,6 +82,7 @@ export const Projects: React.FC = () => {
         "Implemented data processing and basic image analysis techniques to ensure accurate soil reports and disease identification."
       ],
       github: "https://github.com/bhatshakir11/Agro_Sense",
+      demo: "#", // <-- Insert your Smart Crop AI demo video link here if available
       gradient: "linear-gradient(135deg, #10b981, #065f46)"
     }
   ];
@@ -150,19 +162,32 @@ export const Projects: React.FC = () => {
                   >
                     <GithubIcon size={16} /> Code
                   </a>
-                  <a 
-                    href={project.github} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="project-link-btn clickable"
-                  >
-                    <ExternalLink size={16} /> Demo
-                  </a>
+                  {project.demo && project.demo !== "#" && (
+                    <a 
+                      href={project.demo} 
+                      onClick={(e) => handleDemoClick(e, project.demo)}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="project-link-btn clickable"
+                    >
+                      <ExternalLink size={16} /> Demo
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
           ))}
         </div>
+        {activeVideo && (
+          <div className="video-modal-overlay" onClick={() => setActiveVideo(null)}>
+            <div className="video-modal-content glass-card" onClick={(e) => e.stopPropagation()}>
+              <button className="video-modal-close" onClick={() => setActiveVideo(null)}>
+                &times;
+              </button>
+              <video src={activeVideo} controls autoPlay className="modal-video-player" />
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
