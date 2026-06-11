@@ -32,7 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, toggleTheme }) => {
   useEffect(() => {
     const observerOptions = {
       root: null,
-      rootMargin: '-80px 0px -60% 0px', // account for header offset
+      rootMargin: '-70px 0px -60% 0px', // account for header offset
       threshold: 0
     };
 
@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, toggleTheme }) => {
     setIsMobileMenuOpen(false);
     const element = document.getElementById(id);
     if (element) {
-      const offset = 80; // Navbar height
+      const offset = 70; // Navbar height
       const bodyRect = document.body.getBoundingClientRect().top;
       const elementRect = element.getBoundingClientRect().top;
       const elementPosition = elementRect - bodyRect;
