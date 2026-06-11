@@ -6,11 +6,26 @@ export const CustomCursor: React.FC = () => {
   const [transformStyle, setTransformStyle] = useState('translate(-50%, -50%) scale(1)');
   const [isHovered, setIsHovered] = useState(false);
   const [isHidden, setIsHidden] = useState(true);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   // Store previous ring coordinates to calculate relative frame speed
   const prevRingPos = useRef({ x: 0, y: 0 });
 
+  // Detect touch devices on mount
   useEffect(() => {
+    const checkTouch = () => {
+      const hasTouch = 
+        'ontouchstart' in window || 
+        navigator.maxTouchPoints > 0 ||
+        (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+      setIsTouchDevice(hasTouch);
+    };
+    checkTouch();
+  }, []);
+
+  useEffect(() => {
+    if (isTouchDevice) return;
+
     const handleMouseMove = (e: MouseEvent) => {
       setPosition({ x: e.clientX, y: e.clientY });
       setIsHidden(false);
@@ -33,10 +48,11 @@ export const CustomCursor: React.FC = () => {
       document.removeEventListener('mouseleave', handleMouseLeave);
       document.removeEventListener('mouseenter', handleMouseEnter);
     };
-  }, []);
+  }, [isTouchDevice]);
 
   // Smooth animation loop for the outer trailing ring and fluid stretch calculation
   useEffect(() => {
+    if (isTouchDevice) return;
     let animationFrameId: number;
 
     const updateRing = () => {
@@ -44,7 +60,7 @@ export const CustomCursor: React.FC = () => {
         const dx = position.x - prev.x;
         const dy = position.y - prev.y;
         
-        // Lerp speed factor (governs how closely the outer ring follows the pointer)
+        // Lerp speed factor
         const lerpSpeed = 0.14;
         const nextX = prev.x + dx * lerpSpeed;
         const nextY = prev.y + dy * lerpSpeed;
@@ -82,10 +98,12 @@ export const CustomCursor: React.FC = () => {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [position, isHovered]);
+  }, [position, isHovered, isTouchDevice]);
 
   // Track hover status on clickable objects
   useEffect(() => {
+    if (isTouchDevice) return;
+
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (!target) return;
@@ -106,9 +124,9 @@ export const CustomCursor: React.FC = () => {
     return () => {
       window.removeEventListener('mouseover', handleMouseOver);
     };
-  }, []);
+  }, [isTouchDevice]);
 
-  if (isHidden) return null;
+  if (isTouchDevice || isHidden) return null;
 
   return (
     <div className={isHovered ? 'cursor-hover' : ''}>
