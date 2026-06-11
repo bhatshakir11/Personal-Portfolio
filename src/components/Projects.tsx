@@ -54,7 +54,7 @@ export const Projects: React.FC = () => {
         "Implemented biometric authentication and autofill features to enhance security and improve user convenience."
       ],
       github: "https://github.com/bhatshakir11/Cyber_Hygeine_Password_Manager",
-      demo: "/cyberhygiene.mp4", // Point directly to the video in public folder
+      demo: "./cyberhygiene.mp4",
       gradient: "linear-gradient(135deg, #0d9488, #2563eb)"
     },
     {
