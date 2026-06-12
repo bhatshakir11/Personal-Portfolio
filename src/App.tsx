@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CustomCursor } from './components/CustomCursor';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
@@ -12,7 +12,7 @@ import './App.css';
 
 const App: React.FC = () => {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const progressBarRef = useRef<HTMLDivElement>(null);
 
   // Load and apply theme setting
   useEffect(() => {
@@ -36,9 +36,9 @@ const App: React.FC = () => {
   useEffect(() => {
     const handleScroll = () => {
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (totalHeight > 0) {
+      if (totalHeight > 0 && progressBarRef.current) {
         const progress = (window.scrollY / totalHeight) * 100;
-        setScrollProgress(progress);
+        progressBarRef.current.style.width = `${progress}%`;
       }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -73,8 +73,9 @@ const App: React.FC = () => {
     <>
       {/* Scroll Progress Indicator */}
       <div 
+        ref={progressBarRef}
         className="scroll-progress-bar" 
-        style={{ width: `${scrollProgress}%` }}
+        style={{ width: '0%' }}
       />
 
       {/* Dynamic Animated Glass/Mesh Blobs in background */}

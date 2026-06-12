@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 
 interface TiltProps {
   children: React.ReactNode;
@@ -16,11 +16,11 @@ export const Tilt: React.FC<TiltProps> = ({
   style = {}
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const [tiltStyle, setTiltStyle] = useState<React.CSSProperties>({});
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return;
+    if (window.innerWidth <= 768) return;
     const card = ref.current;
+    if (!card) return;
     const box = card.getBoundingClientRect();
     
     // Mouse position relative to the element
@@ -35,17 +35,15 @@ export const Tilt: React.FC<TiltProps> = ({
     const rotateY = ((x - xc) / xc) * maxTilt; 
     const rotateX = -((y - yc) / yc) * maxTilt;
 
-    setTiltStyle({
-      transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${scale}, ${scale}, ${scale})`,
-      transition: 'transform 0.1s cubic-bezier(0.25, 1, 0.5, 1)',
-    });
+    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${scale}, ${scale}, ${scale})`;
+    card.style.transition = 'transform 0.1s cubic-bezier(0.25, 1, 0.5, 1)';
   };
 
   const handleMouseLeave = () => {
-    setTiltStyle({
-      transform: `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`,
-      transition: 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)',
-    });
+    const card = ref.current;
+    if (!card) return;
+    card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+    card.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
   };
 
   return (
@@ -54,7 +52,7 @@ export const Tilt: React.FC<TiltProps> = ({
       className={className}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      style={{ ...style, ...tiltStyle }}
+      style={style}
     >
       {children}
     </div>
