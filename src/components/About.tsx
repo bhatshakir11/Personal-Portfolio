@@ -1,6 +1,7 @@
 import React from 'react';
 import { Award, GraduationCap, Percent, BookOpen } from 'lucide-react';
 import profileImg from '../assets/profile.jpg';
+import { Tilt } from './Tilt';
 
 export const About: React.FC = () => {
   const stats = [
@@ -68,12 +69,12 @@ export const About: React.FC = () => {
             {/* Academic stats cards */}
             <div className="stats-grid">
               {stats.map((stat, index) => (
-                <div key={index} className="stat-card glass-card">
+                <Tilt key={index} className="stat-card glass-card">
                   <div className="stat-icon-wrapper">{stat.icon}</div>
                   <h4 className="stat-value">{stat.value}</h4>
                   <div className="stat-label">{stat.label}</div>
                   <div className="stat-desc">{stat.desc}</div>
-                </div>
+                </Tilt>
               ))}
             </div>
 
@@ -82,13 +83,13 @@ export const About: React.FC = () => {
               <h4 className="certs-heading">Professional Certifications</h4>
               <div className="certs-grid">
                 {certifications.map((cert, index) => (
-                  <div key={index} className="cert-item glass-card">
+                  <Tilt key={index} className="cert-item glass-card">
                     <div className="cert-indicator"></div>
                     <div className="cert-info">
                       <h5 className="cert-title">{cert.title}</h5>
                       <span className="cert-issuer">{cert.issuer}</span>
                     </div>
-                  </div>
+                  </Tilt>
                 ))}
               </div>
             </div>

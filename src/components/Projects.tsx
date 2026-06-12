@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ExternalLink, ShieldCheck, Cpu, Leaf } from 'lucide-react';
+import { Tilt } from './Tilt';
 
 const GithubIcon: React.FC<{ size?: number; className?: string }> = ({ size = 20, className = '' }) => (
   <svg 
@@ -126,7 +127,7 @@ export const Projects: React.FC = () => {
         {/* Projects Cards Grid */}
         <div className="projects-grid">
           {filteredProjects.map((project, index) => (
-            <div key={index} className="project-card glass-card">
+            <Tilt key={index} className="project-card glass-card">
               <div 
                 className="project-banner" 
                 style={{ background: project.gradient }}
@@ -175,7 +176,7 @@ export const Projects: React.FC = () => {
                   )}
                 </div>
               </div>
-            </div>
+            </Tilt>
           ))}
         </div>
         {activeVideo && (

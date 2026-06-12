@@ -1,5 +1,6 @@
 import React from 'react';
 import { Terminal, Cpu, Database, BookOpen, Heart } from 'lucide-react';
+import { Tilt } from './Tilt';
 
 export const Skills: React.FC = () => {
   const skillCategories = [
@@ -47,7 +48,7 @@ export const Skills: React.FC = () => {
 
         <div className="skills-grid">
           {skillCategories.map((category, index) => (
-            <div 
+            <Tilt 
               key={index} 
               className={`skills-card glass-card border-${category.color}`}
             >
@@ -67,7 +68,7 @@ export const Skills: React.FC = () => {
                   </span>
                 ))}
               </div>
-            </div>
+            </Tilt>
           ))}
         </div>
       </div>

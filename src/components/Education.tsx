@@ -1,5 +1,6 @@
 import React from 'react';
 import { Calendar, GraduationCap } from 'lucide-react';
+import { Tilt } from './Tilt';
 
 interface EducationItem {
   degree: string;
@@ -56,7 +57,7 @@ export const Education: React.FC = () => {
                 <GraduationCap size={16} />
               </div>
               
-              <div className="timeline-content glass-card">
+              <Tilt className="timeline-content glass-card">
                 <div className="timeline-date">
                   <Calendar size={14} /> <span>{item.period}</span>
                 </div>
@@ -66,7 +67,7 @@ export const Education: React.FC = () => {
                   <span>{item.grade}</span>
                 </div>
                 <p className="timeline-desc">{item.description}</p>
-              </div>
+              </Tilt>
             </div>
           ))}
         </div>

@@ -12,6 +12,7 @@ import './App.css';
 
 const App: React.FC = () => {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   // Load and apply theme setting
   useEffect(() => {
@@ -30,6 +31,19 @@ const App: React.FC = () => {
     document.documentElement.setAttribute('data-theme', nextTheme);
     localStorage.setItem('portfolio-theme', nextTheme);
   };
+
+  // Scroll Progress Tracking
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalHeight > 0) {
+        const progress = (window.scrollY / totalHeight) * 100;
+        setScrollProgress(progress);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Scroll Entrance Reveal Animation Trigger
   useEffect(() => {
@@ -57,6 +71,12 @@ const App: React.FC = () => {
 
   return (
     <>
+      {/* Scroll Progress Indicator */}
+      <div 
+        className="scroll-progress-bar" 
+        style={{ width: `${scrollProgress}%` }}
+      />
+
       {/* Dynamic Animated Glass/Mesh Blobs in background */}
       <div className="bg-mesh">
         <div className="blob blob-1"></div>
