@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sun, Moon, Menu, X } from 'lucide-react';
 
 interface NavbarProps {
@@ -10,6 +10,45 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, toggleTheme }) => {
   const [activeSection, setActiveSection] = useState('home');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [hoveredSection, setHoveredSection] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [pillStyle, setPillStyle] = useState<React.CSSProperties>({
+    width: 0,
+    left: 0,
+    opacity: 0,
+    height: 0
+  });
+
+  // Smooth pill position mapping
+  useEffect(() => {
+    const updatePill = () => {
+      const targetId = hoveredSection || activeSection;
+      const activeBtn = containerRef.current?.querySelector(
+        `.nav-link-btn[data-id="${targetId}"]`
+      ) as HTMLElement;
+
+      if (activeBtn && window.innerWidth > 768) {
+        setPillStyle({
+          width: activeBtn.offsetWidth,
+          left: activeBtn.offsetLeft,
+          height: activeBtn.offsetHeight,
+          opacity: 1
+        });
+      } else {
+        setPillStyle((prev) => ({ ...prev, opacity: 0 }));
+      }
+    };
+
+    updatePill();
+    // Slight delay to ensure elements are fully painted
+    const timeoutId = setTimeout(updatePill, 60);
+
+    window.addEventListener('resize', updatePill);
+    return () => {
+      window.removeEventListener('resize', updatePill);
+      clearTimeout(timeoutId);
+    };
+  }, [activeSection, hoveredSection, isMobileMenuOpen]);
 
   const navItems = [
     { id: 'home', label: 'Home' },
@@ -79,11 +118,22 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, toggleTheme }) => {
           <span className="logo-main">BHAT</span>
         </div>
 
-        <nav className={`nav-links ${isMobileMenuOpen ? 'mobile-active' : ''}`}>
+        <nav 
+          ref={containerRef}
+          className={`nav-links ${isMobileMenuOpen ? 'mobile-active' : ''}`}
+        >
+          {/* Sliding indicator background pill */}
+          <div 
+            className="nav-indicator-pill" 
+            style={pillStyle}
+          />
           {navItems.map((item) => (
             <button
               key={item.id}
+              data-id={item.id}
               onClick={() => handleNavClick(item.id)}
+              onMouseEnter={() => setHoveredSection(item.id)}
+              onMouseLeave={() => setHoveredSection(null)}
               className={`nav-link-btn ${activeSection === item.id ? 'active' : ''}`}
             >
               {item.label}

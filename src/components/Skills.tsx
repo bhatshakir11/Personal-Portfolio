@@ -37,9 +37,9 @@ export const Skills: React.FC = () => {
   ];
 
   return (
-    <section id="skills" className="skills-section reveal">
+    <section id="skills" className="skills-section">
       <div className="container">
-        <div className="section-title-wrapper">
+        <div className="section-title-wrapper reveal">
           <h2 className="section-title">Technical Expertise</h2>
           <p className="section-subtitle">
             A comprehensive list of programming languages, tools, databases, coursework, and personal soft skills.
@@ -50,7 +50,8 @@ export const Skills: React.FC = () => {
           {skillCategories.map((category, index) => (
             <Tilt 
               key={index} 
-              className={`skills-card glass-card border-${category.color}`}
+              className={`skills-card glass-card border-${category.color} reveal-zoom`}
+              style={{ '--reveal-delay': `${index * 100}ms` } as React.CSSProperties}
             >
               <div className="category-header">
                 <div className={`icon-circle bg-${category.color}`}>
@@ -73,5 +74,6 @@ export const Skills: React.FC = () => {
         </div>
       </div>
     </section>
+
   );
 };

@@ -5,16 +5,23 @@ export const CustomCursor: React.FC = () => {
   const ringRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Mutable refs to hold coordinate state without triggering React renders
+  // Positions
   const targetPos = useRef({ x: 0, y: 0 });
-  const dotPos = useRef({ x: 0, y: 0 }); // Current dot position
-  const ringPos = useRef({ x: 0, y: 0 }); // Current ring position
+  const dotPos = useRef({ x: 0, y: 0 });
+  const ringPos = useRef({ x: 0, y: 0 });
   const prevRingPos = useRef({ x: 0, y: 0 });
 
+  // Sizing tracking
+  const ringWidth = useRef(36);
+  const ringHeight = useRef(36);
+
+  // States
   const isTouchMode = useRef(false);
   const isTouchActive = useRef(false);
   const isHovered = useRef(false);
   const isHidden = useRef(true);
+  const isSnapped = useRef(false);
+  const snapTarget = useRef<HTMLElement | null>(null);
   const touchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -23,7 +30,6 @@ export const CustomCursor: React.FC = () => {
     const containerEl = containerRef.current;
     if (!dotEl || !ringEl || !containerEl) return;
 
-    // Helper to update cursor visibility instantly in the DOM
     const updateVisibility = () => {
       if (isHidden.current) {
         containerEl.style.opacity = '0';
@@ -53,11 +59,10 @@ export const CustomCursor: React.FC = () => {
       updateVisibility();
     };
 
-    // Touch Event Handlers: Disable cursor on touchscreens to prevent drag/scroll lag
+    // Touch support (hides cursor to save scrolling frames)
     const handleTouchStart = (e: TouchEvent) => {
       isTouchMode.current = true;
       isTouchActive.current = true;
-      // Hide cursor on touch devices to ensure 100% smooth scrolling
       isHidden.current = true;
       updateVisibility();
 
@@ -69,7 +74,7 @@ export const CustomCursor: React.FC = () => {
       if (e.touches && e.touches.length > 0) {
         const touch = e.touches[0];
         const targetX = touch.clientX;
-        const targetY = touch.clientY - 50; // offset above finger
+        const targetY = touch.clientY - 40;
         targetPos.current = { x: targetX, y: targetY };
         ringPos.current = { x: targetX, y: targetY };
         dotPos.current = { x: targetX, y: targetY };
@@ -80,18 +85,12 @@ export const CustomCursor: React.FC = () => {
     const handleTouchMove = (e: TouchEvent) => {
       isTouchMode.current = true;
       isTouchActive.current = true;
-      isHidden.current = true; // Keep hidden on touch movement to save layout resources
+      isHidden.current = true;
       updateVisibility();
 
-      if (touchTimeout.current) {
-        clearTimeout(touchTimeout.current);
-        touchTimeout.current = null;
-      }
       if (e.touches && e.touches.length > 0) {
         const touch = e.touches[0];
-        const targetX = touch.clientX;
-        const targetY = touch.clientY - 50;
-        targetPos.current = { x: targetX, y: targetY };
+        targetPos.current = { x: touch.clientX, y: touch.clientY - 40 };
       }
     };
 
@@ -100,49 +99,66 @@ export const CustomCursor: React.FC = () => {
       touchTimeout.current = setTimeout(() => {
         isHidden.current = true;
         updateVisibility();
-      }, 400);
+      }, 300);
     };
 
-    // Hover detection over links, buttons, and clickable containers
+    // Hover & snap detection
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (!target) return;
 
-      const isClickable =
-        target.tagName === 'A' ||
-        target.tagName === 'BUTTON' ||
-        target.closest('a') ||
-        target.closest('button') ||
-        target.closest('.glass-card') ||
-        target.closest('.clickable') ||
-        window.getComputedStyle(target).cursor === 'pointer';
+      const clickable = 
+        target.closest('a') || 
+        target.closest('button') || 
+        target.closest('.clickable');
 
-      isHovered.current = !!isClickable;
-      if (isHovered.current) {
+      if (clickable) {
+        isHovered.current = true;
         containerEl.classList.add('cursor-hover');
+
+        // Check eligibility for snapping (navbar options, cards badges, controls buttons)
+        const isEligibleForSnap = 
+          clickable.classList.contains('nav-link-btn') || 
+          clickable.classList.contains('theme-toggle-btn') || 
+          clickable.classList.contains('console-tab') ||
+          clickable.classList.contains('console-action-btn') ||
+          clickable.classList.contains('project-link-btn') ||
+          clickable.classList.contains('btn-hero') ||
+          clickable.classList.contains('filter-btn') ||
+          clickable.classList.contains('floating-badge');
+
+        const rect = clickable.getBoundingClientRect();
+        // Limit snaps to moderately-sized elements to avoid cursor distortion
+        if (isEligibleForSnap && rect.width < 240 && rect.height < 100) {
+          isSnapped.current = true;
+          snapTarget.current = clickable as HTMLElement;
+        } else {
+          isSnapped.current = false;
+          snapTarget.current = null;
+        }
       } else {
+        isHovered.current = false;
         containerEl.classList.remove('cursor-hover');
+        isSnapped.current = false;
+        snapTarget.current = null;
       }
     };
 
-    // Register event listeners
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     document.addEventListener('mouseleave', handleMouseLeave);
     document.addEventListener('mouseenter', handleMouseEnter);
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
     window.addEventListener('touchmove', handleTouchMove, { passive: true });
     window.addEventListener('touchend', handleTouchEnd, { passive: true });
     window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
-    window.addEventListener('mouseover', handleMouseOver);
+    window.addEventListener('mouseover', handleMouseOver, { passive: true });
 
-    // Initial visibility state
     updateVisibility();
 
-    // requestAnimationFrame animation loop
     let animationFrameId: number;
 
     const animate = () => {
-      // Smoothly slide dot to target position
+      // 1. Move dot (tracks mouse coordinates directly)
       const dotDx = targetPos.current.x - dotPos.current.x;
       const dotDy = targetPos.current.y - dotPos.current.y;
       dotPos.current.x += dotDx * 0.45;
@@ -150,37 +166,65 @@ export const CustomCursor: React.FC = () => {
 
       dotEl.style.transform = `translate3d(${dotPos.current.x}px, ${dotPos.current.y}px, 0) translate(-50%, -50%)`;
 
-      // Smoothly slide trailing ring (lerping)
-      const ringDx = targetPos.current.x - ringPos.current.x;
-      const ringDy = targetPos.current.y - ringPos.current.y;
-      const lerpSpeed = 0.14;
+      // 2. Resolve snapping targets or standard coordinates
+      let ringTargetX = targetPos.current.x;
+      let ringTargetY = targetPos.current.y;
+      let targetW = 36;
+      let targetH = 36;
+
+      if (isSnapped.current && snapTarget.current) {
+        const rect = snapTarget.current.getBoundingClientRect();
+        // Center the ring on the element
+        ringTargetX = rect.left + rect.width / 2;
+        ringTargetY = rect.top + rect.height / 2;
+        targetW = rect.width + 10;
+        targetH = rect.height + 8;
+
+        // Custom shape updates
+        ringEl.style.borderRadius = '16px'; 
+        ringEl.style.animation = 'none'; // pause morphing
+      } else {
+        targetW = isHovered.current ? 48 : 36;
+        targetH = isHovered.current ? 48 : 36;
+        
+        ringEl.style.borderRadius = ''; 
+        ringEl.style.animation = 'fluid-morph 4s infinite alternate ease-in-out';
+      }
+
+      // 3. Smooth size changes (lerping)
+      ringWidth.current += (targetW - ringWidth.current) * 0.16;
+      ringHeight.current += (targetH - ringHeight.current) * 0.16;
+
+      ringEl.style.width = `${ringWidth.current}px`;
+      ringEl.style.height = `${ringHeight.current}px`;
+
+      // 4. Smooth motion (lerping coordinates)
+      const ringDx = ringTargetX - ringPos.current.x;
+      const ringDy = ringTargetY - ringPos.current.y;
+      const lerpSpeed = isSnapped.current ? 0.22 : 0.15; // Snaps pull in faster
       const nextX = ringPos.current.x + ringDx * lerpSpeed;
       const nextY = ringPos.current.y + ringDy * lerpSpeed;
 
-      // Calculate velocity and stretch aspect ratio
       const rx = nextX - prevRingPos.current.x;
       const ry = nextY - prevRingPos.current.y;
       prevRingPos.current = { x: nextX, y: nextY };
       ringPos.current = { x: nextX, y: nextY };
 
+      // Calculate trailing stretch
       const velocity = Math.sqrt(rx * rx + ry * ry);
       const angle = Math.atan2(ry, rx) * (180 / Math.PI);
-      const stretch = Math.min(velocity * 0.04, 0.45);
-
-      const currentScale = (isTouchMode.current && isTouchActive.current) ? 2.2 : (isHovered.current ? 1.6 : 1.0);
+      const stretch = isSnapped.current ? 0 : Math.min(velocity * 0.04, 0.4);
 
       let transformStr = `translate3d(${nextX}px, ${nextY}px, 0) translate(-50%, -50%)`;
-      if (velocity > 0.5) {
-        transformStr += ` rotate(${angle}deg) scale(${(1 + stretch) * currentScale}, ${(1 - stretch * 0.25) * currentScale})`;
-      } else {
-        transformStr += ` scale(${currentScale})`;
+      if (velocity > 0.5 && !isSnapped.current) {
+        transformStr += ` rotate(${angle}deg) scale(${1 + stretch}, ${1 - stretch * 0.25})`;
       }
 
       ringEl.style.transform = transformStr;
 
-      // Calculate opacity targets dynamically
-      const ringOpacity = isTouchMode.current ? (isTouchActive.current ? 0.85 : 0) : 1;
-      const dotOpacity = isTouchMode.current ? (isTouchActive.current ? 1 : 0) : 1;
+      // 5. Visibility and opacity updates
+      const ringOpacity = isTouchMode.current ? 0 : 1;
+      const dotOpacity = isTouchMode.current ? 0 : (isSnapped.current ? 0.2 : 1);
       
       ringEl.style.opacity = String(ringOpacity);
       dotEl.style.opacity = String(dotOpacity);
@@ -220,7 +264,6 @@ export const CustomCursor: React.FC = () => {
         transition: 'opacity 0.4s ease, visibility 0.4s ease' 
       }}
     >
-      {/* Center tracking point */}
       <div
         ref={dotRef}
         className="custom-cursor-dot"
@@ -231,7 +274,6 @@ export const CustomCursor: React.FC = () => {
           willChange: 'transform, opacity'
         }}
       />
-      {/* Morphing fluid droplet ring */}
       <div
         ref={ringRef}
         className="custom-cursor-ring"
@@ -239,7 +281,7 @@ export const CustomCursor: React.FC = () => {
           position: 'fixed',
           top: 0,
           left: 0,
-          willChange: 'transform, opacity'
+          willChange: 'transform, opacity, width, height'
         }}
       />
     </div>

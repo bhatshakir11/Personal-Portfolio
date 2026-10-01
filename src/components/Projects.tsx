@@ -93,9 +93,9 @@ export const Projects: React.FC = () => {
     : projectsData.filter(p => p.category === filter);
 
   return (
-    <section id="projects" className="projects-section reveal">
+    <section id="projects" className="projects-section">
       <div className="container">
-        <div className="section-title-wrapper">
+        <div className="section-title-wrapper reveal">
           <h2 className="section-title">Personal Projects</h2>
           <p className="section-subtitle">
             A selection of key technical projects I have built, spanning secure web apps and multi-agent AI ecosystems.
@@ -127,7 +127,11 @@ export const Projects: React.FC = () => {
         {/* Projects Cards Grid */}
         <div className="projects-grid">
           {filteredProjects.map((project, index) => (
-            <Tilt key={index} className="project-card glass-card">
+            <Tilt 
+              key={index} 
+              className="project-card glass-card reveal-zoom"
+              style={{ '--reveal-delay': `${index * 150}ms` } as React.CSSProperties}
+            >
               <div 
                 className="project-banner" 
                 style={{ background: project.gradient }}

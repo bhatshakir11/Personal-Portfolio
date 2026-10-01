@@ -117,9 +117,9 @@ export const Contact: React.FC = () => {
   ];
 
   return (
-    <section id="contact" className="contact-section reveal">
+    <section id="contact" className="contact-section">
       <div className="container">
-        <div className="section-title-wrapper">
+        <div className="section-title-wrapper reveal">
           <h2 className="section-title">Get In Touch</h2>
           <p className="section-subtitle">
             Feel free to reach out for collaboration, project discussions, or inquiries.
@@ -128,7 +128,7 @@ export const Contact: React.FC = () => {
 
         <div className="contact-grid">
           {/* Contact Details Column */}
-          <div className="contact-info-col">
+          <div className="contact-info-col reveal-left">
             <h3 className="contact-subtitle">Let's connect</h3>
             <p className="contact-description">
               Have an exciting opportunity or project you want to discuss? Contact me through any of the channels below or fill out the message form, and I will get back to you as soon as possible.
@@ -142,6 +142,7 @@ export const Contact: React.FC = () => {
                   target={info.link.startsWith('http') ? "_blank" : "_self"}
                   rel="noopener noreferrer"
                   className="contact-info-item glass-card clickable"
+                  style={{ '--reveal-delay': `${index * 80}ms` } as React.CSSProperties}
                 >
                   <div className="contact-icon-box">{info.icon}</div>
                   <div className="contact-details">
@@ -154,8 +155,9 @@ export const Contact: React.FC = () => {
           </div>
 
           {/* Contact Form Column */}
-          <div className="contact-form-col">
+          <div className="contact-form-col reveal-right" style={{ '--reveal-delay': '150ms' } as React.CSSProperties}>
             <form onSubmit={handleSubmit} className="contact-form glass-card">
+
               <div className="form-group">
                 <label htmlFor="name" className="form-label">Full Name</label>
                 <input 

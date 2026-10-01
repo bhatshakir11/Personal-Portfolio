@@ -8,6 +8,7 @@ import { Projects } from './components/Projects';
 import { Education } from './components/Education';
 import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
+import { BackgroundCanvas } from './components/BackgroundCanvas';
 import './App.css';
 
 const App: React.FC = () => {
@@ -45,21 +46,20 @@ const App: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Scroll Entrance Reveal Animation Trigger
+  // Scroll Entrance Reveal Animation Trigger for all directions
   useEffect(() => {
-    const revealElements = document.querySelectorAll('.reveal');
+    const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-zoom');
     
     const observerOptions = {
       root: null,
       threshold: 0.1,
-      rootMargin: '0px 0px -60px 0px' // triggers slightly before scrolling fully in
+      rootMargin: '0px 0px -40px 0px' // triggers slightly before scrolling fully in
     };
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('active');
-          // Once revealed, we can optionally stop observing
           observer.unobserve(entry.target);
         }
       });
@@ -67,6 +67,23 @@ const App: React.FC = () => {
 
     revealElements.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
+  }, []);
+
+  // Card Hover Coordinate Tracking (for custom border glows)
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      const card = (e.target as HTMLElement).closest('.glass-card') as HTMLElement;
+      if (card) {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+      }
+    };
+
+    window.addEventListener('mousemove', handleGlobalMouseMove, { passive: true });
+    return () => window.removeEventListener('mousemove', handleGlobalMouseMove);
   }, []);
 
   return (
@@ -78,12 +95,8 @@ const App: React.FC = () => {
         style={{ width: '0%' }}
       />
 
-      {/* Dynamic Animated Glass/Mesh Blobs in background */}
-      <div className="bg-mesh">
-        <div className="blob blob-1"></div>
-        <div className="blob blob-2"></div>
-        <div className="blob blob-3"></div>
-      </div>
+      {/* Dynamic Interactive Canvas Background */}
+      <BackgroundCanvas />
 
       {/* Trailing Glow Custom Cursor */}
       <CustomCursor />

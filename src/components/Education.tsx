@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, GraduationCap } from 'lucide-react';
 import { Tilt } from './Tilt';
 
@@ -11,6 +11,36 @@ interface EducationItem {
 }
 
 export const Education: React.FC = () => {
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const [progressHeight, setProgressHeight] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const timeline = timelineRef.current;
+      if (!timeline) return;
+
+      const rect = timeline.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+
+      // Distance from top trigger (75% viewport height) to top of timeline
+      const startTrigger = windowHeight * 0.75;
+      const relativeScroll = startTrigger - rect.top;
+      const timelineHeight = rect.height;
+
+      if (relativeScroll < 0) {
+        setProgressHeight(0);
+      } else {
+        const percent = Math.min((relativeScroll / timelineHeight) * 100, 100);
+        setProgressHeight(percent);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Trigger once on mount
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const educationData: EducationItem[] = [
     {
       degree: "Bachelor of Computer Science and Engineering",
@@ -36,22 +66,28 @@ export const Education: React.FC = () => {
   ];
 
   return (
-    <section id="education" className="education-section reveal">
+    <section id="education" className="education-section">
       <div className="container">
-        <div className="section-title-wrapper">
+        <div className="section-title-wrapper reveal">
           <h2 className="section-title">Education</h2>
           <p className="section-subtitle">
             My academic path and grades from secondary school to my current engineering degree.
           </p>
         </div>
 
-        <div className="timeline-container">
-          <div className="timeline-line"></div>
+        <div className="timeline-container" ref={timelineRef}>
+          <div className="timeline-line">
+            <div 
+              className="timeline-line-progress"
+              style={{ height: `${progressHeight}%` }}
+            />
+          </div>
           
           {educationData.map((item, index) => (
             <div 
               key={index} 
-              className={`timeline-item ${index % 2 === 0 ? 'left' : 'right'}`}
+              className={`timeline-item ${index % 2 === 0 ? 'left reveal-left' : 'right reveal-right'}`}
+              style={{ '--reveal-delay': `${index * 150}ms` } as React.CSSProperties}
             >
               <div className="timeline-dot">
                 <GraduationCap size={16} />
@@ -73,5 +109,6 @@ export const Education: React.FC = () => {
         </div>
       </div>
     </section>
+
   );
 };

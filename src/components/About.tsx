@@ -33,9 +33,9 @@ export const About: React.FC = () => {
   ];
 
   return (
-    <section id="about" className="about-section reveal">
+    <section id="about" className="about-section">
       <div className="container">
-        <div className="section-title-wrapper">
+        <div className="section-title-wrapper reveal">
           <h2 className="section-title">About Me</h2>
           <p className="section-subtitle">
             A glance into my academic achievements, background, and certifications.
@@ -43,7 +43,7 @@ export const About: React.FC = () => {
         </div>
 
         <div className="about-grid">
-          <div className="about-image-wrapper">
+          <div className="about-image-wrapper reveal-left">
             <div className="image-frame">
               <img src={profileImg} alt="Shakir Ahmad Bhat" className="profile-img" />
               <div className="floating-badge badge-top-right">
@@ -55,7 +55,8 @@ export const About: React.FC = () => {
             </div>
           </div>
 
-          <div className="about-details">
+          <div className="about-details reveal-right">
+
             <h3 className="about-greeting">
               I'm a passionate problem solver and computer science researcher.
             </h3>
@@ -69,7 +70,11 @@ export const About: React.FC = () => {
             {/* Academic stats cards */}
             <div className="stats-grid">
               {stats.map((stat, index) => (
-                <Tilt key={index} className="stat-card glass-card">
+                <Tilt 
+                  key={index} 
+                  className="stat-card glass-card reveal-zoom"
+                  style={{ '--reveal-delay': `${index * 100}ms` } as React.CSSProperties}
+                >
                   <div className="stat-icon-wrapper">{stat.icon}</div>
                   <h4 className="stat-value">{stat.value}</h4>
                   <div className="stat-label">{stat.label}</div>
@@ -79,11 +84,15 @@ export const About: React.FC = () => {
             </div>
 
             {/* Certifications Block */}
-            <div className="certs-wrapper">
+            <div className="certs-wrapper reveal">
               <h4 className="certs-heading">Professional Certifications</h4>
               <div className="certs-grid">
                 {certifications.map((cert, index) => (
-                  <Tilt key={index} className="cert-item glass-card">
+                  <Tilt 
+                    key={index} 
+                    className="cert-item glass-card reveal-zoom"
+                    style={{ '--reveal-delay': `${index * 100}ms` } as React.CSSProperties}
+                  >
                     <div className="cert-indicator"></div>
                     <div className="cert-info">
                       <h5 className="cert-title">{cert.title}</h5>
@@ -93,6 +102,7 @@ export const About: React.FC = () => {
                 ))}
               </div>
             </div>
+
           </div>
         </div>
       </div>
